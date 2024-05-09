@@ -66,7 +66,7 @@ const TxResult: React.FC<Props> = ({ txResult, onUploadToIPFS }) => {
                       </td>
                     </tr>
                     <tr>
-                      <td className="text-xs pr-4 pb-2">To:</td>
+                      <td className="text-xs text-gray-900 pr-4 pb-2">To:</td>
                       <td className="text-xs text-gray-900 pb-2">
                         {txResult.to}
                       </td>
