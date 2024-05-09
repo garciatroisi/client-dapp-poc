@@ -12,11 +12,12 @@ interface Loan {
 }
 
 interface LoanListProps {
-  loans: Loan[];
-  onRepayClick: (id: string) => void;
+  loans: string[];
+  onRepayClick: (id: string, amount: string) => void;
+  repayLoading: string[];
 }
 
-const LoanList: React.FC<LoanListProps> = ({ loans, onRepayClick }) => {
+const LoanList: React.FC<LoanListProps> = ({ loans, onRepayClick, repayLoading }) => {
 
   const parseLoan = (loanString: string): Loan => {
     const [id, borrower, amount, term, startTime, active, collateralNFTId] = loanString.split(',');
@@ -31,6 +32,7 @@ const LoanList: React.FC<LoanListProps> = ({ loans, onRepayClick }) => {
     };
   };
 
+ 
   return (
     <div className="bg-gray-100 p-4 rounded-lg shadow-md">
       <h2 className="text-lg font-bold text-black mb-4">Loan List</h2>
@@ -47,17 +49,22 @@ const LoanList: React.FC<LoanListProps> = ({ loans, onRepayClick }) => {
             </tr>
           </thead>
           <tbody>
-            {loans.map((loanString, index) => {
-              const loan = parseLoan(loanString);
+            {loans.map((loan, index) => { 
+              const parsedLoan = parseLoan(loan); 
+              const loading = repayLoading.includes(parsedLoan.id); // Check if this loan is loading
               return (
                 <tr key={index} className="border-b hover:bg-gray-200">
-                  <td className="py-2 px-4 text-black">{loan.amount}</td>
-                  <td className="py-2 px-4 text-black">{loan.collateralNFTId}</td>
-                  <td className="py-2 px-4 text-black">{loan.term}</td>
+                  <td className="py-2 px-4 text-black">{parsedLoan.amount}</td>
+                  <td className="py-2 px-4 text-black">{parsedLoan.collateralNFTId}</td>
+                  <td className="py-2 px-4 text-black">{parsedLoan.term}</td>
                   <td className="py-2 px-4 text-black">
-                    <button onClick={() => onRepayClick(loan.id)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded mt-1">
-                      Repay
-                    </button>
+                    {loading ? (
+                      <span>Loading...</span>
+                    ) : (
+                      <button onClick={() => onRepayClick(parsedLoan.id, parsedLoan.amount)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded mt-1">
+                        Repay
+                      </button>
+                    )}
                   </td>
                 </tr>
               );

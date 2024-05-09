@@ -5,6 +5,8 @@ import BasicNFT from "../contracts/BasicNFT.json";
 import LoanCollateralContract from "../contracts/LoanCollateralContract.json";
 import LoanRequest from "./LoanRequest";
 import LoanList from "./LoanList";
+import TxResult from "./TxResult";
+import { ObjTxResult } from "../types/ObjTxResult";
 
 function MetamaskGrid() {
   const [installed, setInstalled] = useState(false);
@@ -15,7 +17,9 @@ function MetamaskGrid() {
   const [notification, setNotification] = useState<string | null>(null);
   const [isLoanRequestVisible, setLoanRequestVisible] = useState(false);
   const [isLoanListVisible, setLoanListVisible] = useState(true);
-
+  const [repayLoading, setRepayLoading] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [txResult, setTxResult] = useState<ObjTxResult | null>(null);
   const ethereum = useMetaMask();
 
   const refreshStatus = async () => {
@@ -79,13 +83,18 @@ function MetamaskGrid() {
           ethereum.selectedAddress,
           true
         );
-        
-        if (resultLoansObject) {
-          const userLoans = Object.values(resultLoansObject).map((obj) =>
-            obj.toString()
+
+        if (resultLoansObject && typeof resultLoansObject === "object") {
+          const userLoans = Object.values(resultLoansObject).map(
+            (obj: unknown) => {
+              if (typeof obj === "string") {
+                return obj;
+              }
+              return String(obj);
+            }
           );
           setLoans(userLoans);
-          console.log( userLoans );
+          console.log(userLoans);
         }
       }
     } catch (error) {
@@ -99,7 +108,7 @@ function MetamaskGrid() {
     try {
       await ethereum.request({ method: "eth_requestAccounts" });
       if (ethereum.selectedAddress) {
-        await getBalances();
+        await refreshStatus();
         setConnected(true); // Update connection status
       }
     } catch (error) {
@@ -111,6 +120,7 @@ function MetamaskGrid() {
     try {
       if (!ethereum) return; // MetaMask provider not available
       if (ethereum.selectedAddress) {
+        setLoading(true);
         const provider = new ethers.BrowserProvider(ethereum);
         const signer = await provider.getSigner();
 
@@ -122,22 +132,86 @@ function MetamaskGrid() {
         const parsedAmount = ethers.parseUnits(amount, "ether");
         const parsedNftId = parseInt(nftId);
         await contract.requestLoan(parsedAmount, 30, parsedNftId);
-        await getLoans();
+        await refreshStatus();
         setNotification("Loan requested successfully!");
 
         setTimeout(() => {
           setNotification(null);
         }, 3000);
         console.log("Loan requested:", parsedAmount, parsedNftId);
+        setLoading(false);
       }
     } catch (error) {
       console.error("Error getting loans:", error);
+      setLoading(false);
     }
   };
 
-  const handleRepayClick = (id: string) => {
-    console.log(`Repaying loan with ID: ${id}`);
+  const handleRepayClick = async (id: string, amount: string) => {
+    try {
+      if (!ethereum) return; // MetaMask provider not available
+      if (ethereum.selectedAddress) {
+        setRepayLoading((prevLoading) => [...prevLoading, id]);
+        const provider = new ethers.BrowserProvider(ethereum);
+        const signer = await provider.getSigner();
+
+        const contract = new ethers.Contract(
+          LoanCollateralContract.address,
+          LoanCollateralContract.abi,
+          signer
+        );
+        const parsedAmount = ethers.parseUnits(amount, "ether");
+        const loanId = parseInt(id);
+        console.log(`Repaying loan with ID: ${id} | Amount: ${parsedAmount}`);
+        const repayLoanResult = await contract.repayLoan(loanId, {
+          value: parsedAmount,
+        });
+
+        console.log({ repayLoanResult });
+        setTxResult(repayLoanResult);
+
+        await refreshStatus();
+        setNotification("Loan repaid successfully!");
+
+        setTimeout(() => {
+          setNotification(null);
+        }, 3000);
+        setRepayLoading((prevLoading) =>
+          prevLoading.filter((itemId) => itemId !== id)
+        );
+      }
+    } catch (error) {
+      console.error("Error getting loans:", error);
+      setRepayLoading((prevLoading) =>
+        prevLoading.filter((itemId) => itemId !== id)
+      );
+    }
   };
+
+  const handleUploadToIPFS = async () => {
+    if (txResult) {
+      console.log("Uploading to IPFS...");
+      try {
+        const response = await fetch('http://localhost:3000/upload-to-ipfs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ txResult }), 
+        });
+  
+        if (!response.ok) {
+          throw new Error('Error uploading to IPFS');
+        }
+  
+        const data = await response.json();
+        console.log('Upload to IPFS successful:', data);
+      } catch (error) {
+        console.error('Error uploading to IPFS:', error);
+      } 
+    }
+  };
+   
 
   useEffect(() => {
     if (ethereum && ethereum.isMetaMask) {
@@ -217,16 +291,33 @@ function MetamaskGrid() {
               {isLoanRequestVisible ? "Hide Loan Request" : "Loan Request"}
             </button>
           </div>
+          {isLoanListVisible && (
+            <LoanList
+              loans={loans}
+              onRepayClick={handleRepayClick}
+              repayLoading={repayLoading}
+            />
+          )}
 
-          {isLoanListVisible && <LoanList loans={loans} onRepayClick={handleRepayClick} />}
           {isLoanRequestVisible && (
-            <LoanRequest handleRequestLoan={handleRequestLoan} />
+            <LoanRequest
+              handleRequestLoan={handleRequestLoan}
+              loading={loading}
+            />
           )}
           {notification && (
             <div className="fixed bottom-0 right-0 mb-4 mr-4 bg-green-500 text-white p-4 rounded-md">
               {notification}
             </div>
           )}
+          <div className="m-4">
+            {txResult && (
+              <TxResult
+                txResult={txResult}
+                onUploadToIPFS={handleUploadToIPFS}
+              />
+            )}
+          </div>
         </div>
       )}
     </div>
