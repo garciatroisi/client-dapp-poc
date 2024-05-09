@@ -18,6 +18,17 @@ Tips:
 • There is no right or wrong answer, you are here to demonstrate your strengths (and not expose your weaknesses too much).
 • The video should be no longer than 3-minutes
 
+
+ 
+PART 2: The presentation
+Put together a brief customer presentation showcasing the PoC you created.
+Include:
+- The technical key points and highlight the Consensys products used
+- A review of the codebase of the different components and how Consensys products are implemented
+- A placeholder slide for you to demo the PoC when presenting
+In the following question you will be asked to present this to the customer.
+
+
 Solution:
 
 For this Proof of Concept (PoC), I propose integrating ConsenSys products to demonstrate the functionality. 
@@ -25,15 +36,15 @@ For this Proof of Concept (PoC), I propose integrating ConsenSys products to dem
 Here's a brief overview of the features and ConsenSys products I'll utilize:
 
 
-2. **Linea Dapp - Smart Contracts PoC**: Linea will serve as the foundation for managing loans efficiently and scalably. By leveraging ConsenSys' zkEVM technology, Linea ensures the security and scalability required to process sensitive financial transactions quickly and cost-effectively. Linea will act as the Layer 2 (L2) solution, providing a scalable infrastructure for executing smart contracts efficiently.
+1. **Linea Dapp - Smart Contracts PoC**: Linea stands out as an excellent choice, serving as a robust foundation for handling transactions efficiently and at scale. Leveraging ConsenSys' zkEVM technology, Linea ensures both the security and scalability required for processing transactions swiftly and cost-effectively. Operating as a Layer 2 (L2) solution, Linea provides a scalable infrastructure customized for the streamlined execution of smart contracts.
 
-3. **NFT Interaction and Integration**: Infura will continue to be used to interact with Linea, mint and fetch the list of tokens owned by users efficiently and securely.
+2. **Smart Contract Integration and Audit**: Our partnership with Hardhat proves invaluable for the seamless development and rigorous testing of smart contracts. Concurrently, leveraging ConsenSys Diligence ensures that smart contracts undergo thorough audits to fortify their security.
 
-1. **NFT Visualization**: Users can utilize MetaMask to integrate their wallets, enabling seamless interaction with the Linea or any blockchain and securely verifying NFT ownership.
+3. **NFT Interaction and Integration**: The continued utilization of Infura remains pivotal for seamless interaction with Linea, facilitating the minting and retrieval of users' token lists efficiently and securely.
 
-4. **Smart Contract Integration and Audit**: Hardhat partnership will be super useful for the development and testing of smart contracts, while ConsenSys Diligence can be employed to audit smart contracts and ensure their security.
+4. **Loans Visualization**: Integration with MetaMask empowers users to seamlessly connect their wallets, facilitating effortless interaction with Linea or any blockchain. This integration provides a secure platform for users to verify and manage their loans with ease.
 
-5. **User Interface (UI) Development**: Integrate your dapp with MetaMask using the Wallet API. You can interact with your users' Ethereum accounts, performing multiple tasks
+5. **Utilizing Infura for IPFS Uploads**: Leveraging Infura's robust infrastructure, Linea streamlines the process of uploading files to the InterPlanetary File System (IPFS). This integration ensures that files are securely uploaded to IPFS, providing a decentralized and immutable storage solution. By harnessing Infura's reliable services, Linea enhances data integrity and accessibility for users, further bolstering the platform's efficiency and resilience.
 
 This PoC leverages ConsenSys' tools and technology to deliver a secure, scalable, and efficient lending and NFT-backed borrowing platform that meets the client's requirements and demonstrates the ability to integrate innovative ConsenSys solutions into decentralized applications.
 
