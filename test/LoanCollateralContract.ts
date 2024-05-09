@@ -1,7 +1,7 @@
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
-import { ethers, network } from "hardhat";
-import { parseEther, formatEther } from "ethers";
+import { ethers } from "hardhat";
+import { parseEther } from "ethers";
 
 describe("LoanCollateralContract", function () {
   async function deployLoanCollateralFixture() {
@@ -97,5 +97,50 @@ describe("LoanCollateralContract", function () {
     });
   });
 
+
+  describe("Get Loans By Address", function () {
+    it("Should return loans array with all loan information", async function () {
+      const { loanCollateralContract, basicNFT } = await loadFixture(deployLoanCollateralFixture);
+      const [borrower] = await ethers.getSigners(); // Use array destructuring to get the first signer
+      const collateralNFTId = 1;
+      const collateralNFTId2 = 22;
+      const amount = parseEther("0.1"); // 1 ETH
+      const term = 30; // 30 days 
+
+      await basicNFT.mint(borrower.address, collateralNFTId);
+
+      const loansAddress = await loanCollateralContract.getAddress();
+
+      // Approve the LoanCollateralContract to transfer the NFT
+      await basicNFT.connect(borrower).approve(loansAddress, collateralNFTId);
+
+      await expect(loanCollateralContract.connect(borrower).requestLoan(amount, term, collateralNFTId))
+        .to.emit(loanCollateralContract, "LoanRequested");
+
+      await basicNFT.mint(borrower.address, collateralNFTId2);
+      const ownerOfNFT = await basicNFT.ownerOf(collateralNFTId2);
+      expect(ownerOfNFT).to.equal(borrower.address);
+
+      await basicNFT.connect(borrower).approve(loansAddress, collateralNFTId2);
+      await expect(loanCollateralContract.connect(borrower).requestLoan(amount, term, collateralNFTId2))
+        .to.emit(loanCollateralContract, "LoanRequested");
+
+      const onlyActive = true;
+      const loansArray = await loanCollateralContract.getLoansByAddress(borrower.address, onlyActive);
+
+      // Assert that loansArray is not empty
+      expect(loansArray).to.not.be.empty;
+
+      // Assert that loansArray is an array of objects
+      expect(loansArray).to.be.an("array");
+      
+      expect(loansArray.length).to.equal(2);
+
+      loansArray.forEach(loan => {
+        expect(Object.keys(loan).length).to.equal(7);
+      });
+
+    });
+  });
 
 });

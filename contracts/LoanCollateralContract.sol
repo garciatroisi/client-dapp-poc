@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract LoanCollateralContract is Ownable {
     struct Loan {
+        uint256 id;
         address borrower;
         uint256 amount;
         uint256 term;
@@ -52,6 +53,7 @@ contract LoanCollateralContract is Ownable {
 
         uint256 loanId = loanCounter++;
         loans[loanId] = Loan({
+            id: loanId,
             borrower: msg.sender,
             amount: _amount,
             term: _term,
@@ -100,6 +102,30 @@ contract LoanCollateralContract is Ownable {
 
         // Emitir evento
         emit LoanRepaid(_loanId, msg.sender);
+    }
+
+    // Function to get all loans of an address
+    function getLoansByAddress(
+        address _borrower,
+        bool _onlyActive
+    ) external view returns (Loan[] memory) {
+        // Inicializar el array de préstamos
+        Loan[] memory result = new Loan[](loanCounter);
+        uint256 counter = 0;
+        for (uint256 i = 0; i < loanCounter; i++) {
+            if (
+                loans[i].borrower == _borrower &&
+                (!_onlyActive || loans[i].active)
+            ) {
+                result[counter] = loans[i];
+                counter++;
+            }
+        }
+
+        assembly {
+            mstore(result, counter)
+        }
+        return result;
     }
 
     // Fallback function to receive Ether

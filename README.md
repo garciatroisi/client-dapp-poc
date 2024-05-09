@@ -42,14 +42,12 @@ This PoC leverages ConsenSys' tools and technology to deliver a secure, scalable
 
 # deploy 
 npx hardhat ignition deploy ignition/modules/LoanCollateralContract.ts --network linea_sepolia
-<!-- LoanCollateralContract#BasicNFT - 0xB8019455513bCA94f46B3b61Ad335F90d4b9Cf19 -->
-<!-- LoanCollateralContract#LoanCollateralContract - 0xEb6Ef20a3A7f2D4D430fdcbC4AD8a67713B5Dc15  -->
 
 ## Verify base
-npx hardhat verify --network linea_sepolia 0xB8019455513bCA94f46B3b61Ad335F90d4b9Cf19
+npx hardhat verify --network linea_sepolia 0x3035ff01BB0B98af96cBF33083B23339836a75B6
 
 ## Verify loan
-npx hardhat verify --network linea_sepolia --constructor-args arguments.ts 0xEb6Ef20a3A7f2D4D430fdcbC4AD8a67713B5Dc15
+npx hardhat verify --network linea_sepolia --constructor-args arguments.ts 0xC2C5Fa133381b2249041e94164d5faAB7DCfcc4e
 
 # dApp
 
