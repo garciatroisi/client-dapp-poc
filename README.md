@@ -1,37 +1,9 @@
-# client-dapp-poc
+# Client-Dapp-POC
 
-The assignment
-Customer brief:
-The customer is a company quite familiar with the EVM principles, planning to launch a new dApp, but who never used any Consensys products.
-They reached out to the Customer Enablement Team of Consensys to see how Consensys products could be used for building their dApp.
-Their dApp will be a lending & borrowing platform where end-users can collateralize an NFT to borrow money.
+## Description
 
-Guidelines:
-Develop a PoC to demonstrate how one or many Consensys Products can be used for the customer's purpose. 
-It is not expected that the PoC covers all the features of a lending/borrowing platform, but instead,
- to cherry-pick a very limited number of features that would allow you to showcase Consensys products integration and help the customer to clear any technical difficulties he would have.
+This project is a Proof of Concept (PoC) demonstrating the functionality of a decentralized application (DApp) that deploys smart contracts on the Linea network and then utilizes them with Infura and MetaMask. The ConsenSys suite is used to showcase how we can interact with the blockchain.
 
-While on a kickoff call with the customer, you are asked to describe the PoC you will create. What features will it provide and which Consensys products will be used?
-Tips:
-• Focus on where you think that technical complexity would rely on the customer (eg: the dApp will probably have to list the tokens owned by one user: how should the customer use Infura to get the list of tokens owned by a user)
-• The customer brief is unclear on purpose. Think ahead about the interrogations and expectations of the customer (eg: why not use Linea for my dApp?)
-• There is no right or wrong answer, you are here to demonstrate your strengths (and not expose your weaknesses too much).
-• The video should be no longer than 3-minutes
-
-
- 
-PART 2: The presentation
-Put together a brief customer presentation showcasing the PoC you created.
-Include:
-- The technical key points and highlight the Consensys products used
-- A review of the codebase of the different components and how Consensys products are implemented
-- A placeholder slide for you to demo the PoC when presenting
-In the following question you will be asked to present this to the customer.
-
-
-Solution:
-
-For this Proof of Concept (PoC), I propose integrating ConsenSys products to demonstrate the functionality. 
 
 Here's a brief overview of the features and ConsenSys products I'll utilize:
 
@@ -49,20 +21,64 @@ Here's a brief overview of the features and ConsenSys products I'll utilize:
 This PoC leverages ConsenSys' tools and technology to deliver a secure, scalable, and efficient lending and NFT-backed borrowing platform that meets the client's requirements and demonstrates the ability to integrate innovative ConsenSys solutions into decentralized applications.
 
 
-# Abut the code
+## Usage
 
-# deploy 
+Please replace `[NETWORK_NAME]` with the name of the network you're deploying to, 
+`[BASE_CONTRACT_ADDRESS]` with the address of the base contract, 
+and `[LOAN_CONTRACT_ADDRESS]` with the address of the specific loan contract. 
+
+### Deployment
+
+To deploy a contract, run the following command:
+ ```
+ npx hardhat ignition deploy ignition/modules/LoanCollateralContract.ts --network [NETWORK_NAME]
+ ```
+
+Example:
+ ```
 npx hardhat ignition deploy ignition/modules/LoanCollateralContract.ts --network linea_sepolia
+ ```
+ 
 
-## Verify base
+To verify the base contract, execute:
+
+ ```
+npx hardhat verify --network [NETWORK_NAME] [BASE_CONTRACT_ADDRESS]
+ ```
+
+Example:
+ ```
 npx hardhat verify --network linea_sepolia 0x3035ff01BB0B98af96cBF33083B23339836a75B6
+ ```
 
-## Verify loan
+
+To verify a loan contract with specific arguments, 
+replace `arguments.ts` the BaseNFT address and run:
+
+ ```
+ npx hardhat verify --network [NETWORK_NAME] --constructor-args arguments.ts [LOAN_CONTRACT_ADDRESS]
+ ```
+
+Example:
+ ```
 npx hardhat verify --network linea_sepolia --constructor-args arguments.ts 0xC2C5Fa133381b2249041e94164d5faAB7DCfcc4e
+ ```
 
-# dApp
+### DApp
 
-  cd loans-dapp
-  npm install
-  npm run dev
+To run the DApp, follow these steps:
+
+1. Navigate to the `loans-dapp` directory.
+2. Install dependencies with `npm install`.
+3. Run the DApp with `npm run dev`.
+
+### Backend
+
+We have a backend for uploading transaction results to IPFS. 
+To execute it, follow these steps:
+
+1. Navigate to the `backend` directory.
+2. Install dependencies with `npm install`.
+3. Run the DApp with `npm start`.
+
   
