@@ -6,7 +6,7 @@ import LoanCollateralContract from "../contracts/LoanCollateralContract.json";
 import LoanRequest from "./LoanRequest";
 import LoanList from "./LoanList";
 import TxResult from "./TxResult";
-import { ObjTxResult } from "../types/ObjTxResult";
+import { ObjTxResult } from "../interfaces/ObjTxResult";
 
 function MetamaskGrid() {
   const [installed, setInstalled] = useState(false);

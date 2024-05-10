@@ -1,46 +1,42 @@
 import { useState } from "react";
-import { ethers } from "ethers";
-import BasicNFT from "../contracts/BasicNFT.json";
+import useNFTMinter from "../hooks/useNFTMinter";
+import { MintResult } from "../interfaces/MintResult"; 
+
 
 function Mint() {
-  const API_KEY = import.meta.env.VITE_APP_API_KEY;
-  const PRIVATE_KEY = import.meta.env.VITE_APP_PRIVATE_KEY;
-  const infuraProvider = new ethers.InfuraProvider("linea-sepolia", API_KEY);
-
   const [address, setAddress] = useState("");
   const [nftId, setNftId] = useState("");
   const [mintSuccess, setMintSuccess] = useState(false);
-  const [loading, setLoading] = useState(false); // State variable for loading state
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | string | null>(null);
+  const { mintNFT } = useNFTMinter();
 
   const handleMint = async () => {
     try {
-      setLoading(true); // Set loading state to true
-      const signer = new ethers.Wallet(PRIVATE_KEY, infuraProvider);
-
-      const basicNFTContract = new ethers.Contract(
-        BasicNFT.address,
-        BasicNFT.abi,
-        signer
-      );
-
-      const tx = await basicNFTContract.mint(address, nftId);
-      await tx.wait();
-
-      console.log("Mint successful!");
-      setMintSuccess(true);
-
+      setLoading(true); // Set loading state to true before making the call
+      setError(null); // Reset the error when attempting to mint again
+      const result: MintResult = await mintNFT(address, nftId);
+      if (result.success) {
+        console.log("Mint successful!");
+        setMintSuccess(true);
+      } else {
+        setError(result.error || "An unknown error occurred");
+      }
       setTimeout(() => {
         setMintSuccess(false); // Reset mint success after 3 seconds
-        setLoading(false); // Reset loading state after 3 seconds
-      }, 3000); // 3000 milliseconds = 3 seconds
+      }, 3000);
     } catch (error) {
       console.error("Error executing mint:", error);
-      setLoading(false); // Reset loading state on error
+      setError(
+        error instanceof Error ? error.message : "An unknown error occurred"
+      );
+    } finally {
+      setLoading(false); // Set loading state back to false after the operation
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-top mt-5 p-4">      
+    <div className="flex flex-col items-center justify-top mt-5 p-4 overflow-y-auto">
       <h2 className="text-xl text-light font-bold mb-5">Mint Grid</h2>
       <input
         type="text"
@@ -61,13 +57,17 @@ function Mint() {
         onClick={handleMint}
         disabled={loading} // Disable button when loading
       >
-        {loading ? 'Loading...' : 'Mint'} {/* Change button text based on loading state */}
+        {loading ? "Loading..." : "Mint"}{" "}
+        {/* Change button text based on loading state */}
       </button>
-      {mintSuccess && (
-        <p className="text-green-500">Mint successful!</p>
+      {mintSuccess && <p className="text-green-500">Mint successful!</p>}
+      {typeof error === "string" && (
+        <p className="text-red-500 max-w-[300px] mt-2 mb-0 ml-4 mr-4 text-sm">Error: {error}</p>
       )}
     </div>
   );
+  
+  
 }
 
 export default Mint;

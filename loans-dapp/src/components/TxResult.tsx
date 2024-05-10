@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { ObjTxResult } from "../types/ObjTxResult";
+import { ObjTxResult } from "../interfaces/ObjTxResult";
 
 interface Props {
   txResult: ObjTxResult;
-  onUploadToIPFS: () => void; // Definimos la función de manejo de eventos para cargar a IPFS
+  onUploadToIPFS: () => void;
 }
 
 const TxResult: React.FC<Props> = ({ txResult, onUploadToIPFS }) => {
@@ -18,7 +18,6 @@ const TxResult: React.FC<Props> = ({ txResult, onUploadToIPFS }) => {
   };
 
   const handleUploadToIPFS = () => {
-    // Llamar a la función proporcionada por el padre para cargar a IPFS
     onUploadToIPFS();
     console.log("Data uploaded to IPFS:", txResult);
   };
