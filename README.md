@@ -16,7 +16,7 @@ Here's a brief overview of the features and ConsenSys products I'll utilize:
 
 4. **Loans Visualization**: Integration with MetaMask empowers users to seamlessly connect their wallets, facilitating effortless interaction with Linea or any blockchain. This integration provides a secure platform for users to verify and manage their loans with ease.
 
-5. **Utilizing Infura for IPFS Uploads**: Leveraging Infura's robust infrastructure, Linea streamlines the process of uploading files to the InterPlanetary File System (IPFS). This integration ensures that files are securely uploaded to IPFS, providing a decentralized and immutable storage solution. By harnessing Infura's reliable services, Linea enhances data integrity and accessibility for users, further bolstering the platform's efficiency and resilience.
+5. **Utilizing Infura for IPFS Uploads**: Leveraging Infura's robust infrastructure, Linea streamlines the process of uploading files to the InterPlanetary File System (IPFS). This integration ensures that files are securely uploaded to IPFS, providing a decentralized and immutable storage solution.
 
 This PoC leverages ConsenSys' tools and technology to deliver a secure, scalable, and efficient lending and NFT-backed borrowing platform that meets the client's requirements and demonstrates the ability to integrate innovative ConsenSys solutions into decentralized applications.
 
