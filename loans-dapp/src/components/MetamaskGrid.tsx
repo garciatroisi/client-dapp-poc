@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMetaMask } from "../hooks/useMetaMask";
+import { useLoan } from "../hooks/useLoan";
 import { ethers } from "ethers";
 import BasicNFT from "../contracts/BasicNFT.json";
 import LoanCollateralContract from "../contracts/LoanCollateralContract.json";
@@ -21,6 +22,7 @@ function MetamaskGrid() {
   const [loading, setLoading] = useState(false);
   const [txResult, setTxResult] = useState<ObjTxResult | null>(null);
   const ethereum = useMetaMask();
+  const { requestLoan, repayLoan } = useLoan();
 
   const refreshStatus = async () => {
     await getBalances();
@@ -121,24 +123,30 @@ function MetamaskGrid() {
       if (!ethereum) return; // MetaMask provider not available
       if (ethereum.selectedAddress) {
         setLoading(true);
-        const provider = new ethers.BrowserProvider(ethereum);
-        const signer = await provider.getSigner();
+        // const provider = new ethers.BrowserProvider(ethereum);
+        // const signer = await provider.getSigner();
 
-        const contract = new ethers.Contract(
-          LoanCollateralContract.address,
-          LoanCollateralContract.abi,
-          signer
-        );
-        const parsedAmount = ethers.parseUnits(amount, "ether");
-        const parsedNftId = parseInt(nftId);
-        await contract.requestLoan(parsedAmount, 30, parsedNftId);
-        await refreshStatus();
-        setNotification("Loan requested successfully!");
+        // const contract = new ethers.Contract(
+        //   LoanCollateralContract.address,
+        //   LoanCollateralContract.abi,
+        //   signer
+        // );
+        // const parsedAmount = ethers.parseUnits(amount, "ether");
+        // const parsedNftId = parseInt(nftId);
+        // await contract.requestLoan(parsedAmount, 30, parsedNftId);
+        const requestLoanResult = await requestLoan(ethereum, amount, nftId);
+        if (requestLoanResult.success) {
+          await refreshStatus();
+          setNotification("Loan requested successfully!");
 
-        setTimeout(() => {
-          setNotification(null);
-        }, 3000);
-        console.log("Loan requested:", parsedAmount, parsedNftId);
+          setTimeout(() => {
+            setNotification(null);
+          }, 3000);
+          console.log("Loan requested:", amount, nftId);
+        } else {
+          // :TODO SETERROR
+          // setError(result.error || "An unknown error occurred");
+        }
         setLoading(false);
       }
     } catch (error) {
@@ -152,33 +160,31 @@ function MetamaskGrid() {
       if (!ethereum) return; // MetaMask provider not available
       if (ethereum.selectedAddress) {
         setRepayLoading((prevLoading) => [...prevLoading, id]);
-        const provider = new ethers.BrowserProvider(ethereum);
-        const signer = await provider.getSigner();
+        // const provider = new ethers.BrowserProvider(ethereum);
+        // const signer = await provider.getSigner();
 
-        const contract = new ethers.Contract(
-          LoanCollateralContract.address,
-          LoanCollateralContract.abi,
-          signer
-        );
-        const parsedAmount = ethers.parseUnits(amount, "ether");
-        const loanId = parseInt(id);
-        console.log(`Repaying loan with ID: ${id} | Amount: ${parsedAmount}`);
-        const repayLoanResult = await contract.repayLoan(loanId, {
-          value: parsedAmount,
-        });
+        // const contract = new ethers.Contract(
+        //   LoanCollateralContract.address,
+        //   LoanCollateralContract.abi,
+        //   signer
+        // );
+        // const parsedAmount = ethers.parseUnits(amount, "ether");
+        // const loanId = parseInt(id);
+        // console.log(`Repaying loan with ID: ${id} | Amount: ${parsedAmount}`);
+        const repayLoanResult = await repayLoan(ethereum, id, amount);
+        if (repayLoanResult.success) {
+          setTxResult(repayLoanResult.value);
 
-        console.log({ repayLoanResult });
-        setTxResult(repayLoanResult);
+          await refreshStatus();
+          setNotification("Loan repaid successfully!");
 
-        await refreshStatus();
-        setNotification("Loan repaid successfully!");
-
-        setTimeout(() => {
-          setNotification(null);
-        }, 3000);
-        setRepayLoading((prevLoading) =>
-          prevLoading.filter((itemId) => itemId !== id)
-        );
+          setTimeout(() => {
+            setNotification(null);
+          }, 3000);
+          setRepayLoading((prevLoading) =>
+            prevLoading.filter((itemId) => itemId !== id)
+          );
+        }
       }
     } catch (error) {
       console.error("Error getting loans:", error);
@@ -192,26 +198,25 @@ function MetamaskGrid() {
     if (txResult) {
       console.log("Uploading to IPFS...");
       try {
-        const response = await fetch('http://localhost:3000/upload-to-ipfs', {
-          method: 'POST',
+        const response = await fetch("http://localhost:3000/upload-to-ipfs", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify({ txResult }), 
+          body: JSON.stringify({ txResult }),
         });
-  
+
         if (!response.ok) {
-          throw new Error('Error uploading to IPFS');
+          throw new Error("Error uploading to IPFS");
         }
-  
+
         const data = await response.json();
-        console.log('Upload to IPFS successful:', data);
+        console.log("Upload to IPFS successful:", data);
       } catch (error) {
-        console.error('Error uploading to IPFS:', error);
-      } 
+        console.error("Error uploading to IPFS:", error);
+      }
     }
   };
-   
 
   useEffect(() => {
     if (ethereum && ethereum.isMetaMask) {

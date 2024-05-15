@@ -1,7 +1,6 @@
 import { useState } from "react";
 import useNFTMinter from "../hooks/useNFTMinter";
-import { MintResult } from "../interfaces/MintResult"; 
-
+import { ContractResult } from "../interfaces/ContractResult";
 
 function Mint() {
   const [address, setAddress] = useState("");
@@ -15,7 +14,7 @@ function Mint() {
     try {
       setLoading(true); // Set loading state to true before making the call
       setError(null); // Reset the error when attempting to mint again
-      const result: MintResult = await mintNFT(address, nftId);
+      const result: ContractResult = await mintNFT(address, nftId);
       if (result.success) {
         console.log("Mint successful!");
         setMintSuccess(true);
@@ -62,12 +61,12 @@ function Mint() {
       </button>
       {mintSuccess && <p className="text-green-500">Mint successful!</p>}
       {typeof error === "string" && (
-        <p className="text-red-500 max-w-[300px] mt-2 mb-0 ml-4 mr-4 text-sm">Error: {error}</p>
+        <p className="text-red-500 max-w-[300px] mt-2 mb-0 ml-4 mr-4 text-sm">
+          Error: {error}
+        </p>
       )}
     </div>
   );
-  
-  
 }
 
 export default Mint;
