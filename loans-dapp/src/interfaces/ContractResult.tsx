@@ -1,7 +1,7 @@
-import { ObjTxResult } from "../interfaces/ObjTxResult";
+import { ethers } from 'ethers';
 
 export interface ContractResult {
   success: boolean;
   error?: Error | string;
-  value: ObjTxResult;
+  value: ethers.TransactionResponse;
 }

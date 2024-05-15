@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { ObjTxResult } from "../interfaces/ObjTxResult";
+import { ethers } from "ethers";
 
 interface Props {
-  txResult: ObjTxResult;
+  txResult: ethers.TransactionResponse;
   onUploadToIPFS: () => void;
 }
 
@@ -80,13 +80,15 @@ const TxResult: React.FC<Props> = ({ txResult, onUploadToIPFS }) => {
                 <table className="w-full">
                   <tbody>
                     <tr>
-                      <pre className="text-xs text-gray-900 pb-2 whitespace-pre-wrap">
-                        {txResult.data}
-                      </pre>
+                      <td>
+                        <pre className="text-xs text-gray-900 pb-2 whitespace-pre-wrap">
+                          {txResult.data}
+                        </pre>
+                      </td>
                     </tr>
                   </tbody>
                 </table>
-              </div> 
+              </div>
             </div>
             <button
               onClick={handleUploadToIPFS}

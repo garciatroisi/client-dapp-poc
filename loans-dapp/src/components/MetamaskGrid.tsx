@@ -7,7 +7,6 @@ import LoanCollateralContract from "../contracts/LoanCollateralContract.json";
 import LoanRequest from "./LoanRequest";
 import LoanList from "./LoanList";
 import TxResult from "./TxResult";
-import { ObjTxResult } from "../interfaces/ObjTxResult";
 
 function MetamaskGrid() {
   const [installed, setInstalled] = useState(false);
@@ -20,9 +19,11 @@ function MetamaskGrid() {
   const [isLoanListVisible, setLoanListVisible] = useState(true);
   const [repayLoading, setRepayLoading] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [txResult, setTxResult] = useState<ObjTxResult | null>(null);
+  const [txResult, setTxResult] = useState<ethers.TransactionResponse | null>(
+    null
+  );
   const ethereum = useMetaMask();
-  const { requestLoan, repayLoan } = useLoan();
+  const { requestLoan, repayLoan, getLoansByAddress} = useLoan();
 
   const refreshStatus = async () => {
     await getBalances();
@@ -72,22 +73,15 @@ function MetamaskGrid() {
     try {
       if (!ethereum) return; // MetaMask provider not available
       if (ethereum.selectedAddress) {
-        const provider = new ethers.BrowserProvider(ethereum);
-        const signer = await provider.getSigner();
-
-        const contract = new ethers.Contract(
-          LoanCollateralContract.address,
-          LoanCollateralContract.abi,
-          signer
-        );
-
-        const resultLoansObject = await contract.getLoansByAddress(
+        
+        const resultLoansObject = await getLoansByAddress(
+          ethereum,
           ethereum.selectedAddress,
           true
-        );
+        ); 
 
-        if (resultLoansObject && typeof resultLoansObject === "object") {
-          const userLoans = Object.values(resultLoansObject).map(
+        if (resultLoansObject.success && typeof resultLoansObject === "object") {
+          const userLoans = Object.values(resultLoansObject.value).map(
             (obj: unknown) => {
               if (typeof obj === "string") {
                 return obj;
@@ -123,17 +117,6 @@ function MetamaskGrid() {
       if (!ethereum) return; // MetaMask provider not available
       if (ethereum.selectedAddress) {
         setLoading(true);
-        // const provider = new ethers.BrowserProvider(ethereum);
-        // const signer = await provider.getSigner();
-
-        // const contract = new ethers.Contract(
-        //   LoanCollateralContract.address,
-        //   LoanCollateralContract.abi,
-        //   signer
-        // );
-        // const parsedAmount = ethers.parseUnits(amount, "ether");
-        // const parsedNftId = parseInt(nftId);
-        // await contract.requestLoan(parsedAmount, 30, parsedNftId);
         const requestLoanResult = await requestLoan(ethereum, amount, nftId);
         if (requestLoanResult.success) {
           await refreshStatus();
@@ -160,24 +143,11 @@ function MetamaskGrid() {
       if (!ethereum) return; // MetaMask provider not available
       if (ethereum.selectedAddress) {
         setRepayLoading((prevLoading) => [...prevLoading, id]);
-        // const provider = new ethers.BrowserProvider(ethereum);
-        // const signer = await provider.getSigner();
-
-        // const contract = new ethers.Contract(
-        //   LoanCollateralContract.address,
-        //   LoanCollateralContract.abi,
-        //   signer
-        // );
-        // const parsedAmount = ethers.parseUnits(amount, "ether");
-        // const loanId = parseInt(id);
-        // console.log(`Repaying loan with ID: ${id} | Amount: ${parsedAmount}`);
         const repayLoanResult = await repayLoan(ethereum, id, amount);
         if (repayLoanResult.success) {
           setTxResult(repayLoanResult.value);
-
           await refreshStatus();
           setNotification("Loan repaid successfully!");
-
           setTimeout(() => {
             setNotification(null);
           }, 3000);
@@ -224,7 +194,6 @@ function MetamaskGrid() {
     } else {
       setInstalled(false);
     }
-
     if (ethereum && ethereum.isMetaMask && ethereum.selectedAddress) {
       setConnected(true); // MetaMask is connected
     } else {

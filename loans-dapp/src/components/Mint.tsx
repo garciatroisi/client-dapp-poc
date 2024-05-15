@@ -1,5 +1,5 @@
 import { useState } from "react";
-import useNFTMinter from "../hooks/useNFTMinter";
+import { useNFTMinter } from "../hooks/useNFTMinter";
 import { ContractResult } from "../interfaces/ContractResult";
 
 function Mint() {
