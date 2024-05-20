@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useMetaMask } from "../hooks/useMetaMask";
 import { useLoan } from "../hooks/useLoan";
 import { ethers } from "ethers";
@@ -7,6 +7,7 @@ import LoanCollateralContract from "../contracts/LoanCollateralContract.json";
 import LoanRequest from "./LoanRequest";
 import LoanList from "./LoanList";
 import TxResult from "./TxResult";
+const NETWORK_ID = import.meta.env.VITE_NETWORK_ID;
 
 function MetamaskGrid() {
   const [installed, setInstalled] = useState(false);
@@ -15,17 +16,18 @@ function MetamaskGrid() {
   const [nftBalance, setNftBalance] = useState("");
   const [loans, setLoans] = useState<string[]>([]);
   const [notification, setNotification] = useState<string | null>(null);
-  const [isLoanRequestVisible, setLoanRequestVisible] = useState(false);
-  const [isLoanListVisible, setLoanListVisible] = useState(true);
+  const [isLoanRequestVisible, setIsLoanRequestVisible] = useState(false);
+  const [isLoanListVisible, setIsLoanListVisible] = useState(true);
   const [repayLoading, setRepayLoading] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [txResult, setTxResult] = useState<ethers.TransactionResponse | null>(
     null
   );
   const ethereum = useMetaMask();
-  const { requestLoan, repayLoan, getLoansByAddress} = useLoan();
+  const { requestLoan, repayLoan, getLoansByAddress } = useLoan();
 
   const refreshStatus = async () => {
+    await switchChain();
     await getBalances();
     await getLoans();
   };
@@ -73,14 +75,16 @@ function MetamaskGrid() {
     try {
       if (!ethereum) return; // MetaMask provider not available
       if (ethereum.selectedAddress) {
-        
         const resultLoansObject = await getLoansByAddress(
           ethereum,
           ethereum.selectedAddress,
           true
-        ); 
+        );
 
-        if (resultLoansObject.success && typeof resultLoansObject === "object") {
+        if (
+          resultLoansObject.success &&
+          typeof resultLoansObject === "object"
+        ) {
           const userLoans = Object.values(resultLoansObject.value).map(
             (obj: unknown) => {
               if (typeof obj === "string") {
@@ -188,18 +192,60 @@ function MetamaskGrid() {
     }
   };
 
-  useEffect(() => {
-    if (ethereum && ethereum.isMetaMask) {
-      setInstalled(true); // MetaMask is installed
-    } else {
-      setInstalled(false);
-    }
-    if (ethereum && ethereum.isMetaMask && ethereum.selectedAddress) {
-      setConnected(true); // MetaMask is connected
-    } else {
-      setConnected(false);
+  const switchChain = useCallback(async () => {
+    if (ethereum?.isMetaMask) {
+      // You can get network info form https://chainid.network/chains.json
+      const decimalNumber = parseInt(NETWORK_ID, 10);
+      const chainIdHex = ethers.toBeHex(decimalNumber).toString();
+      console.log({ chainIdHex });
+
+      await ethereum.request({
+        method: "wallet_addEthereumChain",
+        params: [
+          {
+            chainId: chainIdHex,
+            chainName: "Linea Sepolia",
+            rpcUrls: ["https://rpc.sepolia.linea.build/"],
+            nativeCurrency: {
+              name: "Linea Ether",
+              symbol: "ETH",
+              decimals: 18,
+            },
+            blockExplorerUrls: ["https://sepolia.lineascan.build"],
+          },
+        ],
+      });
+      await ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: chainIdHex }],
+      });
     }
   }, [ethereum]);
+
+  const handleAccount = useCallback(() => { 
+    setConnected(false);     
+  }, []);
+
+  useEffect(() => {
+    console.log("ENTRA useEffect");
+
+    const isMetaMaskInstalled = ethereum?.isMetaMask;
+    const isMetaMaskConnected = ethereum?.selectedAddress;
+
+    setInstalled(!!isMetaMaskInstalled); // MetaMask is installed
+    setConnected(!!isMetaMaskConnected); // MetaMask is connected
+
+    if (
+      isMetaMaskInstalled &&
+      isMetaMaskConnected &&
+      ethereum.networkVersion !== NETWORK_ID
+    ) {
+      switchChain();  
+    }
+
+    ethereum?.on("chainChanged", handleAccount);
+    
+  }, [ethereum, switchChain, handleAccount]);
 
   return (
     <div className="bg-gray-100 p-4 rounded-lg shadow-md">
@@ -251,7 +297,7 @@ function MetamaskGrid() {
           </p>
           <div className="m-4 flex justify-end">
             <button
-              onClick={() => setLoanListVisible(!isLoanListVisible)}
+              onClick={() => setIsLoanListVisible(!isLoanListVisible)}
               className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
             >
               {isLoanListVisible ? "Hide Loan List" : "Loan List"}
@@ -259,7 +305,7 @@ function MetamaskGrid() {
           </div>
           <div className="m-4 flex justify-end">
             <button
-              onClick={() => setLoanRequestVisible(!isLoanRequestVisible)}
+              onClick={() => setIsLoanRequestVisible(!isLoanRequestVisible)}
               className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
             >
               {isLoanRequestVisible ? "Hide Loan Request" : "Loan Request"}
