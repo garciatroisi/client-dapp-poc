@@ -142,7 +142,7 @@ function MetamaskGrid() {
     }
   };
 
-  const handleRepayClick = async (id: string, amount: string) => {
+  const handleRepayLoan = async (id: string, amount: string) => {
     try {
       if (!ethereum) return; // MetaMask provider not available
       if (ethereum.selectedAddress) {
@@ -227,7 +227,6 @@ function MetamaskGrid() {
   }, []);
 
   useEffect(() => {
-    console.log("ENTRA useEffect");
 
     const isMetaMaskInstalled = ethereum?.isMetaMask;
     const isMetaMaskConnected = ethereum?.selectedAddress;
@@ -314,7 +313,7 @@ function MetamaskGrid() {
           {isLoanListVisible && (
             <LoanList
               loans={loans}
-              onRepayClick={handleRepayClick}
+              onRepayClick={handleRepayLoan}
               repayLoading={repayLoading}
             />
           )}

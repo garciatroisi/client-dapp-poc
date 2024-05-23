@@ -64,7 +64,7 @@ function WalletNFTs() {
           Fetch NFTs
         </button>
       </form>
-      <div className="flex flex-wrap justify-center">
+      <div className="flex flex-wrap justify-center max-w-[300px] mx-auto">
         {userNFTs.length === 0 ? (
           <div className="m-2 text-center text-gray-500">Nothing to show</div>
         ) : (
